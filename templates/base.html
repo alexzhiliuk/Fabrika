@@ -37,6 +37,68 @@
 </main>
 
 <script src="{{ url_for('static', filename='js/app.min.js') }}"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-analytics.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDn0L8kb8IE9AUF548XkYsCqp24hdOJSB8",
+        authDomain: "fabrika-2.firebaseapp.com",
+        projectId: "fabrika-2",
+        storageBucket: "fabrika-2.appspot.com",
+        messagingSenderId: "94283813590",
+        appId: "1:94283813590:web:f0154bdec998c293eb2f77",
+        measurementId: "G-PJCMWPCFYN"
+    };
+    const vapidKey = "BD1W2CdXEai3KBYIAWs47eJIJIY_efNm2CnBLqg4wjjhLTig962eL6OOBkGWmuwX94BEalEl6s2AV9XtZHjGaDk";
+
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then(function (registration) {
+            console.log('Service Worker зарегистрирован с областью: ', registration.scope);
+        })
+        .catch(function (error) {
+            console.log('Ошибка регистрации Service Worker: ', error);
+        });
+    } else {
+        console.warn('Push уведомления не поддерживаются в этом браузере.');
+    }
+
+    function sendTokenToServer(token) {
+        fetch('/register-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token: token })
+        })
+        .then(response => response.json())
+        .then(data => console.log('Token registered:', data))
+        .catch(error => console.error('Error registering token:', error));
+    }
+
+    function requestPermission() {
+        Notification.requestPermission().then((permission) => {
+            if (permission === 'granted') {
+               getToken(messaging, { vapidKey: vapidKey }).then((currentToken) => {
+                   if (currentToken) {
+                        sendTokenToServer(currentToken);
+                   } else {
+                       console.log('No registration token available. Request permission to generate one.');
+                   }
+               }).catch((err) => {
+                   console.log('An error occurred while retrieving token. ', err);
+               });
+            }
+        })
+    }
+    requestPermission()
+
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

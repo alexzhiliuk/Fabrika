@@ -79,3 +79,11 @@ class Consultation(db.Model):
 
     closed = db.Column(db.Boolean, default=False)
 
+
+class FirebaseToken(db.Model):
+    __tablename__ = 'firebase_tokens'
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(256), nullable=False)
+
+    def __repr__(self):
+        return f'<FirebaseToken {self.token}>'

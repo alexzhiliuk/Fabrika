@@ -1,5 +1,7 @@
+import json
 import os
 from functools import wraps
+import requests
 
 from flask import Flask, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -7,7 +9,8 @@ from werkzeug.utils import secure_filename
 from flask_socketio import SocketIO, emit
 from flask_migrate import Migrate
 from config import Config
-from models import db, User, UserRole, Brand, FittingRoom, Consultation
+from models import db, User, UserRole, Brand, FittingRoom, Consultation, FirebaseToken
+from jwt_converter import convert_private_key_to_jwt
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -22,6 +25,37 @@ login_manager.login_view = 'login'
 socketio = SocketIO(app)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'firebase/fabrika-2-firebase-adminsdk-h6f2a-3572a223b0.json')
+OAUTH2_TOKEN = convert_private_key_to_jwt(SERVICE_ACCOUNT_FILE)
+PROJECT_ID = "fabrika-2"
+
+
+def send_fcm_notification(oauth2_token, project_id, device_token, title, body):
+    url = f"https://fcm.googleapis.com/v1/projects/{project_id}/messages:send"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {oauth2_token}"
+    }
+
+    payload = {
+        "message": {
+            "token": device_token,
+            "notification": {
+                "title": title,
+                "body": body
+            }
+        }
+    }
+
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+    if response.status_code == 200:
+        print("Notification sent successfully.")
+    else:
+        print(f"Failed to send notification: {response.status_code}")
+        print(response.json())  # Выводим сообщение об ошибке для диагностики
 
 
 def admin_required(f):
@@ -49,6 +83,7 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
+    send_fcm_notification(OAUTH2_TOKEN, PROJECT_ID, FirebaseToken.query.first().token, "test title", "test body")
     user = current_user
     if user.is_admin():
         fitting_rooms = FittingRoom.query.all()
@@ -367,6 +402,31 @@ def handle_cancel_consultation(data):
         return
 
     emit('cancel_consultation', {'id': data['consultationId']}, broadcast=True)
+
+
+@app.route('/service_worker.js')
+def service_worker():
+    return app.send_static_file('js/service_worker.js')
+
+
+@app.route('/firebase-messaging-sw.js')
+def firebase_worker():
+    return app.send_static_file('js/firebase-messaging-sw.js')
+
+
+@app.route('/register-token', methods=['POST'])
+def register_firebase_token():
+    data = request.json
+    token = data.get('token')
+
+    if FirebaseToken.query.filter_by(token=token).first():
+        return jsonify({'status': 'Token was exist'})
+
+    new_token = FirebaseToken(token=token)
+    db.session.add(new_token)
+    db.session.commit()
+
+    return jsonify({'status': 'Token registered'})
 
 
 if __name__ == '__main__':
