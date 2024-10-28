@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Запросы{% endblock %}
+{% block content %}
+<div class="content">
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+            <div class="sidebar-logo__title">FABRIKA</div>
+        </div>
+        <div class="sidebar__brand">
+            {% if consultant.brand %}
+            <img src="{{ url_for('static', filename='uploads/' + consultant.brand.image) }}" alt="{{ consultant.brand.name }}">
+            {% endif %}
+        </div>
+        <a href="{{ url_for('logout') }}" class="sidebar__btn btn btn_spb btn_outline">
+            <span>{{ consultant.fio }}</span>
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11.2524 8.75C11.2676 6.03122 11.3881 4.55883 12.3486 3.59835C13.447 2.5 15.2147 2.5 18.7503 2.5L20.0003 2.5C23.5358 2.5 25.3036 2.5 26.4019 3.59835C27.5003 4.6967 27.5003 6.46447 27.5003 10L27.5003 20C27.5003 23.5355 27.5003 25.3033 26.4019 26.4017C25.3036 27.5 23.5358 27.5 20.0003 27.5H18.7503C15.2147 27.5 13.447 27.5 12.3486 26.4017C11.3881 25.4412 11.2676 23.9688 11.2524 21.25"
+                      stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M18.75 15L2.5 15M2.5 15L6.875 11.25M2.5 15L6.875 18.75" stroke="#1C274C" stroke-width="1.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+    </div>
+    <div class="main-content shadow">
+        <div class="requests section-padding" id="requests-section">
+            <div class="title">
+                Запросы
+            </div>
+            <div class="requests__items" id="requests-list">
+                {% for consultation in consultations %}
+                    <div class="requests__item request" data-consultation-id="{{ consultation.id }}">
+                        <div class="request__title">Примерочная №{{ consultation.fitting_room_id }}</div>
+                        <div class="request__btn btn btn_outline">Принять запрос</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        function requestClickFunc() {
+            if ($(this).hasClass("request_active")) { return }
+
+            const consultationId = $(this).attr("data-consultation-id")
+            if (!consultationId) { return }
+
+            socket.emit('close_consultation', { consultationId: consultationId });
+
+            let btnText = "Уже иду";
+            $(this).addClass("request_active")
+            $(this).find(".request__btn").text(btnText)
+
+            setTimeout(() => {
+                $(this).remove()
+            }, 2000)
+        }
+
+        socket.on('update_consultations', function(consultation) {
+            let consultationList = $('#requests-list');
+
+            const div = `
+                <div class="requests__item request" data-consultation-id="${consultation.id}">
+                    <div class="request__title">Примерочная №${consultation.roomId}</div>
+                    <div class="request__btn btn btn_outline">Принять запрос</div>
+                </div>
+                `
+            let newRequest = $(div)
+            newRequest.click(requestClickFunc)
+            consultationList.append(newRequest);
+
+        });
+
+        $(".request").click(requestClickFunc)
+
+        socket.on('cancel_consultation', function(consultation) {
+            let consultationId = consultation.id
+            $(`.request[data-consultation-id=${consultationId}]`).remove()
+        });
+    </script>
+{% endblock %}
+
+

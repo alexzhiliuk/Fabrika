@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование {{ fitting_room.number }}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+            <div class="sidebar-logo__title">FABRIKA</div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="admin section-padding">
+            <div class="title">
+                Редактирование примерочной {{ fitting_room.number }}
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <ul class=notifications>
+                {% for category, message in messages %}
+                  <li class="notification notification_{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+            <form class="form" action="{{ url_for('edit_fitting_room', fitting_room_id=fitting_room.id) }}" method="post">
+                <div class="form__inputs">
+                    <input name="number" type="number" class="input" placeholder="Номер примерочной" value="{{ fitting_room.number }}" required>
+                    <button onclick="history.back()" type="button" class="btn btn_outline">Назад</button>
+                    <button class="btn">Сохранить</button>
+                    <a href="{{ url_for('delete_fitting_room', fitting_room_id=fitting_room.id) }}" class="btn btn_red confirm" data-redirect-url="{{ url_for('index') }}">Удалить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

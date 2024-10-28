@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить консультанта{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+            <div class="sidebar-logo__title">FABRIKA</div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="admin section-padding">
+            <div class="title">
+                Добавить нового консультанта
+            </div>
+            <form class="form" action="{{ url_for('add_consultant') }}" method="post">
+                <div class="form__inputs">
+                    <input name="username" type="text" class="input" placeholder="Логин" required>
+                    <input name="first_name" type="text" class="input" placeholder="Имя" required>
+                    <input name="last_name" type="text" class="input" placeholder="Фамилия" required>
+                    <input name="password" type="text" class="input" placeholder="Пароль" required>
+                    <select name="brand" class="input">
+                        {% for brand in brands %}
+                            <option value="{{ brand.name }}">{{ brand.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button onclick="history.back()" type="button" class="btn btn_outline">Назад</button>
+                    <button class="btn">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

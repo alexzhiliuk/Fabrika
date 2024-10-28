@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Примерочная №{{ fitting_room.number }}{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+                <div class="sidebar-logo__title">FABRIKA</div>
+            </div>
+            <div class="sidebar__btn btn btn_outline">
+                <span>Примерочная №{{ fitting_room.id }}</span>
+            </div>
+        </div>
+        <div class="main-content shadow">
+            <div class="need-help" id="need-help-section">
+                <div class="need-help__sider swiper">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide">
+                            <img src="{{ url_for('static', filename='img/slider/slide.png') }}" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="need-help__btn btn" id="need-help-btn">
+                    Нужна помощь консультанта
+                </div>
+            </div>
+            <div class="brands section-padding" id="brands-section" style="display: none;">
+                <div class="title">
+                    Выберите бренд
+                    <div class="btn btn_outline" id="back-to-home-btn">На главную</div>
+                </div>
+                <div class="brands__items">
+                    {% for brand in brands %}
+                    <div class="brands__item brand" data-brand-id="{{ brand.id }}">
+                        <img src="{{ url_for('static', filename='uploads/' + brand.image) }}" alt="{{ brand.name }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="popup" style="display: none;" id="consultant-waiting-popup">
+                    <div class="popup__inner">
+                        <div class="popup__brand brand">
+                            <img src="" alt="">
+                        </div>
+                        <div class="popup__spinner">
+                            <img src="{{ url_for('static', filename='img/spinner.png') }}" alt="Waiting...">
+                        </div>
+                        <div class="popup__text">
+                            Ожидаем ответ от консультанта
+                        </div>
+                        <div class="popup__btn btn btn_outline" style="display: none;">Назад на главную</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script type="text/javascript">
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('fitting_room_notification', function(response) {
+            if (response.roomId != {{ fitting_room.id }}) { return }
+            completePopup()
+        });
+        socket.on('update_consultations', function(consultation) {
+            if (consultation.roomId != {{ fitting_room.id }}) { return }
+            $("#consultant-waiting-popup").attr("data-consultation-id", consultation.id)
+        });
+
+        $("#need-help-btn").click(function() {
+            $("#need-help-section").hide()
+            $("#brands-section").show()
+        })
+        $("#back-to-home-btn").click(function() {
+            $("#need-help-section").show()
+            $("#brands-section").hide()
+        })
+
+        $(".brands__item").click(function() {
+            let imgSrc = $(this).find("img").attr("src"),
+                imgAlt = $(this).find("img").attr("alt")
+
+            const roomId = {{ fitting_room.id }};
+            const brandId = $(this).attr("data-brand-id")
+
+            socket.emit('add_consultation', { roomId: roomId, brandId: brandId });
+
+            $("#consultant-waiting-popup").find(".popup__brand img").attr("src", imgSrc).attr("alt", imgAlt)
+            $("#consultant-waiting-popup").show()
+
+            let timeForBtnShow = 2000;
+
+            let timeoutId = setTimeout(() => {
+                if ($("#consultant-waiting-popup").is(":visible")) {
+                    $("#consultant-waiting-popup").find(".popup__btn").show()
+                }
+            }, timeForBtnShow)
+            $("#consultant-waiting-popup").attr("data-id", timeoutId)
+        })
+
+        $(".popup__btn").click(function() {
+            $(this).parents(".popup").hide()
+
+            let spinnerIconSrc = "{{ url_for('static', filename='img/spinner.png') }}",
+                buttonText = "Назад на главную",
+                text = "Ожидаем ответ от консультанта"
+
+            $("#consultant-waiting-popup").find(".popup__spinner img").attr("src", spinnerIconSrc).css("animation", "");
+            $("#consultant-waiting-popup").find(".popup__btn").hide().text(buttonText);
+            $("#consultant-waiting-popup").find(".popup__text").text(text);
+
+            clearTimeout($("#consultant-waiting-popup").attr("data-id"))
+
+
+            let consultationId = $(this).parents(".popup").attr("data-consultation-id")
+            if (consultationId) {
+                socket.emit('cancel_consultation', { consultationId: consultationId });
+            }
+
+        })
+
+        function completePopup() {
+            let completeIconSrc = "{{ url_for('static', filename='img/check.svg') }}",
+                buttonText = "Закрыть окно",
+                text = "Консультант уже идет к вам!"
+
+            $("#consultant-waiting-popup").find(".popup__spinner img").attr("src", completeIconSrc).css("animation", "none");
+            $("#consultant-waiting-popup").find(".popup__btn").show().text(buttonText);
+            $("#consultant-waiting-popup").find(".popup__text").text(text);
+        }
+
+    </script>
+{% endblock %}

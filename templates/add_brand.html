@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить брэнд{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+            <div class="sidebar-logo__title">FABRIKA</div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="admin section-padding">
+            <div class="title">
+                Добавить новый брэнд
+            </div>
+            <form class="form" action="{{ url_for('add_brand') }}" method="post" enctype="multipart/form-data">
+                <div class="form__inputs">
+                    <input type="text" class="input" name="name" placeholder="Название" required>
+                    <input type="file" accept="image/jpeg, image/png" name="image" class="input" required>
+                    <button onclick="history.back()" type="button" class="btn btn_outline">Назад</button>
+                    <button class="btn">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

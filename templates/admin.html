@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicons -->
+    <link rel="icon" href="{{ url_for('static', filename='icons/icon-192x192.png') }}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap&_v=20241026162139"
+          rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}">
+
+    <link
+            rel="stylesheet"
+            href="https://unpkg.com/swiper/swiper-bundle.min.css?_v=20241026162139"
+    />
+
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js?_v=20241026162139"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js?_v=20241026162139"></script>
+
+    <title>Админ-панель</title>
+</head>
+<body>
+
+
+<main>
+    <div class="content">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+                <div class="sidebar-logo__title">FABRIKA</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="sidebar__btn btn btn_spb btn_outline">
+                <span>Выйти</span>
+                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.2524 8.75C11.2676 6.03122 11.3881 4.55883 12.3486 3.59835C13.447 2.5 15.2147 2.5 18.7503 2.5L20.0003 2.5C23.5358 2.5 25.3036 2.5 26.4019 3.59835C27.5003 4.6967 27.5003 6.46447 27.5003 10L27.5003 20C27.5003 23.5355 27.5003 25.3033 26.4019 26.4017C25.3036 27.5 23.5358 27.5 20.0003 27.5H18.7503C15.2147 27.5 13.447 27.5 12.3486 26.4017C11.3881 25.4412 11.2676 23.9688 11.2524 21.25"
+                          stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M18.75 15L2.5 15M2.5 15L6.875 11.25M2.5 15L6.875 18.75" stroke="#1C274C" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
+        <div class="main-content">
+            <div class="admin section-padding" id="admin-section">
+                <div class="title">
+                    Панель управления
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    <ul class=notifications>
+                    {% for category, message in messages %}
+                      <li class="notification notification_{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
+                <div class="admin__tabs">
+                    <a href="javascript:void(0)" class="admin__tab admin__tab_active" data-tab-id="1">Примерочные</a>
+                    <a href="javascript:void(0)" class="admin__tab" data-tab-id="2">Консультанты</a>
+                    <a href="javascript:void(0)" class="admin__tab" data-tab-id="3">Брэнды</a>
+                </div>
+
+                <div class="table-wrapper" data-tab-body="1">
+                    <a href="{{ url_for('add_fitting_room') }}" class="btn admin__add-btn">Добавить +</a>
+                    <table class="admin__table table">
+                        <tr>
+                            <th>№</th>
+                            <th></th>
+                        </tr>
+                        {% for fitting_room in fitting_rooms %}
+                        <tr>
+                            <td>{{ fitting_room.number }}</td>
+                            <td class="table__action">
+                                <a href="{{ url_for('fitting_room_show', room_id=fitting_room.id) }}" class="btn">Перейти</a>
+                                <a href="{{ url_for('edit_fitting_room', fitting_room_id=fitting_room.id) }}" class="btn btn_outline">Изменить</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="table-wrapper" data-tab-body="2" style="display: none;">
+                    <a href="{{ url_for('add_consultant') }}" class="btn admin__add-btn">Добавить +</a>
+                    <table class="admin__table table">
+                        <tr>
+                            <th>Логин</th>
+                            <th>Имя</th>
+                            <th>Фамилия</th>
+                            <th>Брэнд</th>
+                            <th>Пароль</th>
+                            <th></th>
+                        </tr>
+                        {% for consultant in consultants %}
+                        <tr>
+                            <td>{{ consultant.username }}</td>
+                            <td>{{ consultant.first_name }}</td>
+                            <td>{{ consultant.last_name }}</td>
+                            <td>{{ consultant.brand.name or '-' }}</td>
+                            <td>{{ consultant.password }}</td>
+                            <td class="table__action">
+                                <a href="{{ url_for('edit_consultant', consultant_id=consultant.id) }}" class="btn btn_outline">Изменить</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="table-wrapper" data-tab-body="3" style="display: none;">
+                    <a href="{{ url_for('add_brand') }}" class="btn admin__add-btn">Добавить +</a>
+                    <table class="admin__table table">
+                        <tr>
+                            <th>Логотип</th>
+                            <th>Название</th>
+                            <th></th>
+                        </tr>
+                        {% for brand in brands %}
+                        <tr>
+                            <td>
+                                <div class="brand">
+                                    <img src="{{ url_for('static', filename='uploads/' + brand.image) }}" alt="{{ brand.name }}">
+                                </div>
+                            </td>
+                            <td>{{ brand.name }}</td>
+                            <td class="table__action">
+                                <a href="{{ url_for('edit_brand', brand_id=brand.id) }}" class="btn btn_outline">Изменить</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            $("[data-tab-id]").click(function() {
+                let tabId = $(this).attr("data-tab-id")
+
+                $("[data-tab-id]").removeClass("admin__tab_active")
+                $(this).addClass("admin__tab_active")
+
+                $("[data-tab-body]").hide()
+                $(`[data-tab-body='${tabId}']`).show()
+            })
+        </script>
+
+
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/app.min.js') }}"></script>
+</body>
+</html>

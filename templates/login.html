@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicons -->
+    <link rel="icon" href="{{ url_for('static', filename='icons/icon-192x192.png') }}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap&_v=20241026162139"
+          rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}">
+
+    <link
+            rel="stylesheet"
+            href="https://unpkg.com/swiper/swiper-bundle.min.css?_v=20241026162139"
+    />
+
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js?_v=20241026162139"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js?_v=20241026162139"></script>
+
+    <title>Вход</title>
+</head>
+<body>
+
+
+<main>
+    <div class="content">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+                <div class="sidebar-logo__title">FABRIKA</div>
+            </div>
+            <div class="sidebar__btn btn btn_outline">
+                <span>Авторизация</span>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="login section-padding" id="login-section">
+                <div class="title">
+                    Войдите в аккаунт
+                </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    <ul class=notifications>
+                    {% for category, message in messages %}
+                      <li class="notification notification_{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
+                <form  action="{{ url_for('login') }}" method="post" class="form">
+                    <div class="form__inputs">
+                        <input type="text" class="input" placeholder="Логин" name="username" required>
+                        <input type="password" class="input" placeholder="Пароль" name="password" required>
+                        <button class="btn">Войти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/app.min.js') }}"></script>
+</body>
+</html>

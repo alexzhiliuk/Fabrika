@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование {{ consultant.username }}{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo__subtitle">Fashion-пространство</div>
+            <div class="sidebar-logo__title">FABRIKA</div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="admin section-padding">
+            <div class="title">
+                Редактирование {{ consultant.username }}
+            </div>
+            <form class="form" action="{{ url_for('edit_consultant', consultant_id=consultant.id) }}" method="post">
+                <div class="form__inputs">
+                    <input name="username" type="text" class="input" placeholder="Логин" value="{{ consultant.username }}" required>
+                    <input name="first_name" type="text" class="input" placeholder="Имя" value="{{ consultant.first_name }}" required>
+                    <input name="last_name" type="text" class="input" placeholder="Фамилия" value="{{ consultant.last_name }}" required>
+                    <input name="password" type="text" class="input" placeholder="Пароль" value="{{ consultant.password }}" required>
+                    <select name="brand" class="input">
+                        {% if not consultant.brand %}
+                            <option value="" selected>---</option>
+                        {% endif %}
+                        {% for brand in brands %}
+                            <option value="{{ brand.name }}" {% if consultant.brand == brand %}selected{% endif %}>{{ brand.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button onclick="history.back()" type="button" class="btn btn_outline">Назад</button>
+                    <button class="btn">Сохранить</button>
+                    <a href="{{ url_for('delete_consultant', consultant_id=consultant.id) }}" class="btn btn_red confirm" data-redirect-url="{{ url_for('index') }}">Удалить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
