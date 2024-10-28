@@ -59,7 +59,7 @@
 {% block extra_js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
     <script type="text/javascript">
-        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        const socket = io.connect('https://' + document.domain);
 
         socket.on('fitting_room_notification', function(response) {
             if (response.roomId != {{ fitting_room.id }}) { return }

@@ -22,7 +22,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
