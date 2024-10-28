@@ -3,9 +3,9 @@ venv/
 .DS_Store/
 __pycache__/
 .idea/
+firebase/
 
 *.db
 *.sqlite3
-*.json
 
 frontend/
