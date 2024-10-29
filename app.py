@@ -52,7 +52,7 @@ def send_fcm_notification(oauth2_token, project_id, device_token, title, body):
     response = requests.post(url, headers=headers, data=json.dumps(payload))
 
     if response.status_code == 200:
-        print("Notification sent successfully.")
+        print("Notification sent successfully.", device_token)
     else:
         print(f"Failed to send notification: {response.status_code}")
         print(response.json())  # Выводим сообщение об ошибке для диагностики
@@ -83,7 +83,8 @@ def load_user(user_id):
 @app.route('/')
 @login_required
 def index():
-    send_fcm_notification(OAUTH2_TOKEN, PROJECT_ID, FirebaseToken.query.first().token, "test title", "test body")
+    for token in FirebaseToken.query.all():
+        send_fcm_notification(OAUTH2_TOKEN, PROJECT_ID, token, "test title", "test body")
     user = current_user
     if user.is_admin():
         fitting_rooms = FittingRoom.query.all()
