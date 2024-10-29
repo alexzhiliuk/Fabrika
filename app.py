@@ -84,7 +84,7 @@ def load_user(user_id):
 @login_required
 def index():
     for token in FirebaseToken.query.all():
-        send_fcm_notification(OAUTH2_TOKEN, PROJECT_ID, token, "test title", "test body")
+        send_fcm_notification(OAUTH2_TOKEN, PROJECT_ID, token.token, "test title", "test body")
     user = current_user
     if user.is_admin():
         fitting_rooms = FittingRoom.query.all()
